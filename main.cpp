@@ -142,8 +142,14 @@ int newPerson(int clearOrNot) {
         return 0;
     }
     string BasicBitchAge;
-    cout << "\nWhat is the " + name + " age: ";
+    cout << "\nWhat is the " + name + " age (Type c to cancel): ";
     cin >> BasicBitchAge;
+
+    if (BasicBitchAge == "c" || BasicBitchAge == "C") {
+        cout << "Canceled. " << endl;
+        enterToContinue();
+        return 0;
+    }
     int age;
     try
     {
