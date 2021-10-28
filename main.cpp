@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <fstream>
 using namespace std;
-string holdBeforeEnd;
 string namesOfPeople[999];
 fstream file;
 int agesOfPeople[999];
 int numberOfPeople = 0;
 bool quit = true;
+bool nameInput = false;
 
 int clear(){
     system("cls");
@@ -37,7 +37,13 @@ int saveData() {
     for (int i = 0; i < numberOfPeople; i++) {
         saveFile << agesOfPeople[i] << ",";
     }
-    saveFile << ",";
+    saveFile << "," << endl;
+    if (nameInput == true) {
+        saveFile << "1";
+    }
+    else if (nameInput == false) {
+        saveFile << "0";
+    }
     saveFile.close();
     return 0;
 }
@@ -48,6 +54,7 @@ int emptyData() {
     fillDefult << "0" << endl;
     fillDefult << ",," << endl;
     fillDefult << ",," << endl;
+    fillDefult << "0" << endl;
     return 0;
 }
 
@@ -83,6 +90,14 @@ int readData() {
         }
         else if (numberOfLines == 2) {
             AgeArrayBeforeConversion = lines;
+        }
+        else if (numberOfLines == 3) {
+            if (lines == "0") {
+                nameInput = false;
+            }
+            else if (lines == "1") {
+                nameInput = true;
+            }
         }
         numberOfLines++;
     }
@@ -122,6 +137,28 @@ int readData() {
     return 0;
 }
 
+void checkFileDoesntCrash() {
+    fstream check;
+    check.open("savedData.dat", ios::in);
+    int thingywowIHateLIfe = 0;
+    int checkIfItWorks = 0;
+    string lines;
+    try
+    {
+        while (getline(check,lines)) {
+                if (thingywowIHateLIfe == 0)
+                {
+                    checkIfItWorks = stoi(lines);
+                }
+                thingywowIHateLIfe++;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        emptyData();
+    }    
+}
+
 string toLower(string data){    
     for_each(data.begin(), data.end(), [](char & c) {
         c = ::tolower(c);
@@ -129,20 +166,27 @@ string toLower(string data){
     return data;
 }
 
-int newPerson(int clearOrNot) {
+int newPerson(int clearOrNot, int type, string preName) {
     if (clearOrNot == 0) {
         clear();
     }
     string name;
-    cout << "What is the persons name (Type c to cancel):  ";
-    cin >> name;
-    if (name == "c" || name == "C") {
-        cout << "Canceled. " << endl;
-        enterToContinue();
-        return 0;
+    if (type == 0) {
+
+        cout << "What is the persons name (Type c to cancel):  ";
+        cin >> name;
+        if (name == "c" || name == "C") {
+            cout << "Canceled. " << endl;
+            enterToContinue();
+            return 0;
+        }
     }
+    else if (type == 1) {
+        name = preName;
+    }
+    
     string BasicBitchAge;
-    cout << "\nWhat is the " + name + " age (Type c to cancel): ";
+    cout << "What is the " + name + " age (Type c to cancel): ";
     cin >> BasicBitchAge;
 
     if (BasicBitchAge == "c" || BasicBitchAge == "C") {
@@ -163,7 +207,12 @@ int newPerson(int clearOrNot) {
     {
         clear();
         cout<< "WOW that was toxic DO you know how much hardwork i have to do to make sure this works smh\n";
-        newPerson(1);
+        if (preName == "") {
+            newPerson(1,0,"");
+        }
+        else {
+            newPerson(1,1,preName);
+        }
         return 1;
     }
     
@@ -218,36 +267,55 @@ int removePerson(int anotherThingy) {
         namesOfPeople[i] = namesOfPeople[i + 1]; // copy next element left
         agesOfPeople[i] = agesOfPeople[i + 1];
     }
-    numberOfPeople -= 1;   
+    numberOfPeople -= 1;  
+    listNames(1);
     enterToContinue();
     return 0;
 }
 
+string checkNameInput() {
+    if (nameInput == true) {
+        return "enabled";
+    }
+    else if (nameInput == false) {
+        return "disabled";
+    }
+    return "crash";
+}
+
+void setupFile() {
+    int errorInReading = readData();
+    if (errorInReading == 1) {
+        createFile();
+        emptyData();
+        readData();
+    }
+    else if (errorInReading == 2) {
+        emptyData();
+        readData();
+    }    
+}
+
 int main()
 {
+    checkFileDoesntCrash();
     while (quit) {
+        setupFile();
         clear();
-        int errorInReading = readData();
-        if (errorInReading == 1) {
-            createFile();
-            emptyData();
-            readData();
-        }
-        else if (errorInReading == 2) {
-            emptyData();
-            readData();
-        }
         cout << "Welcome To The Name and Age Remember\n";
         cout << "Type n To put someone in\n";
         cout << "Type l to list the names\n";
         cout << "Type r to remove a name\n";
+        cout << "Type f to toggle input name through command (" << checkNameInput() << ")" << endl; 
         cout << "Type q to quit\n";
         cout << "Command: ";
         string decision;
+        string beforeLower;
         cin >> decision;
+        beforeLower = decision; 
         decision = toLower(decision);
         if (decision == "n"){
-            newPerson(0);
+            newPerson(0, 0, "");
             saveData();
         }
         else if (decision == "l") {
@@ -258,13 +326,29 @@ int main()
             removePerson(0);
             saveData();
         }
+        else if (decision == "f") {
+            if (nameInput == false) {
+                nameInput = true;
+            }
+            else if (nameInput == true) {
+                nameInput = false;
+            }
+            saveData();
+        }
         else if (decision == "q") {
             quit = false;
             saveData();
         }
         else {
-            cout << "try again\n";
-            enterToContinue();
+            if (nameInput == true) {
+                newPerson(0,1,beforeLower);
+                saveData();
+            } 
+            else {
+                cout << "try again\n";
+                enterToContinue();  
+            }
+            
         }
     }
 }
