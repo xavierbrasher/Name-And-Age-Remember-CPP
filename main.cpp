@@ -10,9 +10,13 @@ int numberOfPeople = 0;
 bool quit = true;
 bool nameInput = false;
 
-int clear(){
-    system("cls");
-    return 0;
+void clear(){
+    #ifdef _WIN32 
+        std::system("cls");
+    #else
+        // Assume POSIX
+        std::system ("clear");
+    #endif
 }
 
 int enterToContinue() {
@@ -172,8 +176,7 @@ int newPerson(int clearOrNot, int type, string preName) {
     }
     string name;
     if (type == 0) {
-
-        cout << "What is the persons name (Type c to cancel):  ";
+        cout << "What is the persons first name (Type c to cancel):  ";
         cin >> name;
         if (name == "c" || name == "C") {
             cout << "Canceled. " << endl;
@@ -184,9 +187,16 @@ int newPerson(int clearOrNot, int type, string preName) {
     else if (type == 1) {
         name = preName;
     }
-    
+    string lastName;
+    cout << "What is the persons last name (Type c to cancel):  ";
+    cin >> lastName;
+    if (lastName == "c" || lastName == "C") {
+        cout << "Canceled. " << endl;
+        enterToContinue();
+        return 0;
+    }
     string BasicBitchAge;
-    cout << "What is the " + name + " age (Type c to cancel): ";
+    cout << "What is the " + name + " " + lastName + " age (Type c to cancel): ";
     cin >> BasicBitchAge;
 
     if (BasicBitchAge == "c" || BasicBitchAge == "C") {
@@ -198,7 +208,7 @@ int newPerson(int clearOrNot, int type, string preName) {
     try
     {
         age = stoi(BasicBitchAge);
-        namesOfPeople[numberOfPeople] = name;
+        namesOfPeople[numberOfPeople] = name + " " + lastName;
         agesOfPeople[numberOfPeople] = age;
         numberOfPeople += 1;
         return 0;
