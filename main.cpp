@@ -164,9 +164,7 @@ void checkFileDoesntCrash() {
 }
 
 string toLower(string data){    
-    for_each(data.begin(), data.end(), [](char & c) {
-        c = ::tolower(c);
-    });
+    transform(data.begin(), data.end(), data.begin(), ::tolower);
     return data;
 }
 
